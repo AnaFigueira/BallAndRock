@@ -1,0 +1,36 @@
+﻿<Page
+    x:Class="BallAndRock.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:BallAndRock"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" FontFamily="Segoe UI Light" Loaded="Page_Loaded">
+
+
+    <Grid x:Name="uiGridContent">
+        <Grid.Background>
+            <ImageBrush Stretch="Fill" ImageSource="Assets/background.png"/>
+        </Grid.Background>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBlock TextWrapping="Wrap" Text="Ball And Rock" Grid.Row="0" FontSize="48" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Foreground="White"/>
+        <TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="Highest Score:" VerticalAlignment="Top" FontSize="24" Margin="0" Grid.Row="1" Foreground="White"/>
+        <TextBlock x:Name="uiTbHighestScore" HorizontalAlignment="Center" TextWrapping="Wrap" Text="4554" VerticalAlignment="Center" FontSize="24" Margin="0" Grid.Row="2" Foreground="White"/>
+        <Button x:Name="uiBtStartGame" Content="Start Game!" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="3" Width="200" Height="100" Foreground="White" Click="uiBtStartGame_Click" FontSize="30" BorderBrush="White"/>
+
+    </Grid>
+
+    <Page.BottomAppBar>
+        <CommandBar  ClosedDisplayMode="Minimal">
+            <CommandBar.SecondaryCommands>
+                <AppBarButton x:Name="uiAppBtGameInstructions" Label="Game Instructions" Click="uiAppBtGameInstructions_Click"/>
+                <AppBarButton x:Name="uiAppBtAbout" Label="About" Click="uiAppBtAbout_Click"/>
+            </CommandBar.SecondaryCommands>
+         </CommandBar>
+    </Page.BottomAppBar>
+</Page>
