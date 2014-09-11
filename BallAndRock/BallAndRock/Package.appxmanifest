@@ -4,7 +4,7 @@
   <mp:PhoneIdentity PhoneProductId="c9ec28d3-34fd-4df9-9dc5-7604b575ae94" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>BallAndRock</DisplayName>
-    <PublisherDisplayName>Ana</PublisherDisplayName>
+    <PublisherDisplayName>Ana Figueira</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
   <Prerequisites>
@@ -16,7 +16,7 @@
   </Resources>
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="BallAndRock.App">
-      <m3:VisualElements DisplayName="BallAndRock" Square150x150Logo="Assets\Logo.png" Square44x44Logo="Assets\SmallLogo.png" Description="BallAndRock" ForegroundText="light" BackgroundColor="transparent" ToastCapable="false">
+      <m3:VisualElements DisplayName="Ball and Rock" Square150x150Logo="Assets\Logo.png" Square44x44Logo="Assets\SmallLogo.png" Description="BallAndRock" ForegroundText="light" BackgroundColor="transparent" ToastCapable="false">
         <m3:DefaultTile Wide310x150Logo="Assets\WideLogo.png" Square71x71Logo="Assets\Square71x71Logo.png">
         </m3:DefaultTile>
         <m3:InitialRotationPreference>

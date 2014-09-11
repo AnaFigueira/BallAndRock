@@ -10,9 +10,6 @@
 
     <Grid x:Name="uiGridContent">
     	
-        <!--<Grid.Background>
-            <ImageBrush Stretch="Fill" ImageSource="Assets/background.png"/>
-        </Grid.Background>-->
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -23,7 +20,7 @@
             <Canvas.Background>
                 <ImageBrush Stretch="Fill" ImageSource="Assets/background.png"/>
             </Canvas.Background>
-            <Image  x:Name="uiImgBall"  Height="65"  Width="65" Source="Content/Sprites/a10000.png"/>
+            <Image  x:Name="uiImgBall"  Height="65"  Width="65" Source="Content/Sprites/5.png"/>
 
             <StackPanel Margin="0,0,0,0.0" Orientation="Horizontal" Grid.ColumnSpan="2">
                 <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Score:" VerticalAlignment="Top" FontSize="24"/>

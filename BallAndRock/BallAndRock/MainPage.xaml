@@ -16,12 +16,15 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <TextBlock TextWrapping="Wrap" Text="Ball And Rock" Grid.Row="0" FontSize="48" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Foreground="White"/>
-        <TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="Highest Score:" VerticalAlignment="Top" FontSize="24" Margin="0" Grid.Row="1" Foreground="White"/>
+        <TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="Highest Score:" VerticalAlignment="Top" FontSize="28" Margin="0" Grid.Row="1" Foreground="White"/>
         <TextBlock x:Name="uiTbHighestScore" HorizontalAlignment="Center" TextWrapping="Wrap" Text="4554" VerticalAlignment="Center" FontSize="24" Margin="0" Grid.Row="2" Foreground="White"/>
-        <Button x:Name="uiBtStartGame" Content="Start Game!" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="3" Width="200" Height="100" Foreground="White" Click="uiBtStartGame_Click" FontSize="30" BorderBrush="White"/>
+        <TextBlock x:Name="uiTbInfo" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Center"
+                   Grid.Row="3" FontSize="22" Text=""  Foreground="#FFCC0000" TextAlignment="Center" Margin="0,20,0,0"/>
+        <Button x:Name="uiBtStartGame" Content="Start Game!" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="4" Width="200" Height="100" Foreground="White" Click="uiBtStartGame_Click" FontSize="30" BorderBrush="White"/>
 
     </Grid>
 
@@ -31,6 +34,6 @@
                 <AppBarButton x:Name="uiAppBtGameInstructions" Label="Game Instructions" Click="uiAppBtGameInstructions_Click"/>
                 <AppBarButton x:Name="uiAppBtAbout" Label="About" Click="uiAppBtAbout_Click"/>
             </CommandBar.SecondaryCommands>
-         </CommandBar>
+        </CommandBar>
     </Page.BottomAppBar>
 </Page>

@@ -1,19 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
+﻿using BallAndRock.Common;
+using System;
+using Windows.Devices.Sensors;
 using Windows.Graphics.Display;
 using Windows.Phone.UI.Input;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=391641
@@ -26,33 +18,31 @@ namespace BallAndRock
     public sealed partial class MainPage : Page
     {
 
-
+        private NavigationHelper navigationHelper;
+        private ObservableDictionary defaultViewModel = new ObservableDictionary();
         public MainPage()
         {
             this.InitializeComponent();
-
+            this.navigationHelper = new NavigationHelper(this);
+            this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
+            this.navigationHelper.SaveState += this.NavigationHelper_SaveState;
             HideStatusBar();
 
             // Locks portrait mode for all application. Global setting.
             DisplayInformation.AutoRotationPreferences = DisplayOrientations.Portrait;
 
-            this.NavigationCacheMode = NavigationCacheMode.Required;
         }
 
+        private void NavigationHelper_SaveState(object sender, SaveStateEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
 
+        private void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
 
-        //void HardwareButtons_BackPressed(object sender, BackPressedEventArgs e)
-        //{
-        //    Frame rootFrame = Window.Current.Content as Frame;
-        //    if (rootFrame != null && rootFrame.CanGoBack)
-        //    {
-
-        //        rootFrame.GoBack();
-        //        e.Handled = true;
-
-        //    }
-
-        //}
 
         /// <summary>
         /// Function that hides the status bar.
@@ -71,7 +61,6 @@ namespace BallAndRock
             ApplicationView.GetForCurrentView().SetDesiredBoundsMode(ApplicationViewBoundsMode.UseCoreWindow);
         }
 
-
         /// <summary>
         /// Invoked when this page is about to be displayed in a Frame.
         /// </summary>
@@ -86,6 +75,8 @@ namespace BallAndRock
             // Windows.Phone.UI.Input.HardwareButtons.BackPressed event.
             // If you are using the NavigationHelper provided by some templates,
             // this event is handled for you.
+            //Frame.BackStack.Clear();
+
         }
 
         private void uiBtStartGame_Click(object sender, RoutedEventArgs e)
@@ -105,16 +96,13 @@ namespace BallAndRock
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            //HardwareButtons.BackPressed += HardwareButtons_BackPressed;
+            if (Accelerometer.GetDefault() == null)
+            {
+                uiBtStartGame.IsEnabled = false;
+                uiTbInfo.Text = "Your phone doesn't support this game because it doesn't have an accelerometer. Sorry!";
+            }
+
         }
-
-        #region Navigation
-
-        #endregion
-
-
-
-
 
     }
 }

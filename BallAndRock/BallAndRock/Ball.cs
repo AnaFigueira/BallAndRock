@@ -1,29 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Media.Imaging;
+﻿using System.ComponentModel;
 
 namespace BallAndRock
 {
     public class Ball : INotifyPropertyChanged
     {
+        #region Properties & Constructors
+
+        /// <summary>
+        /// X Coordinate
+        /// </summary>
         private int _x;
+
         public int X
         {
             get { return _x; }
-            set 
-            { 
+            set
+            {
                 this._x = value;
                 NotifyPropertyChanged("X");
             }
         }
 
+        /// <summary>
+        /// Y Coordinate
+        /// </summary>
         private int _y;
+
         public int Y
         {
             get { return _y; }
@@ -34,7 +36,11 @@ namespace BallAndRock
             }
         }
 
+        /// <summary>
+        /// Image size
+        /// </summary>
         private int _size;
+
         public int Size
         {
             get { return _size; }
@@ -45,6 +51,24 @@ namespace BallAndRock
             }
         }
 
+        /// <summary>
+        /// Ball speed
+        /// </summary>
+        public double _speed;
+
+        public double Speed
+        {
+            get { return _speed; }
+            set
+            {
+                this._speed = value;
+                NotifyPropertyChanged("Speed");
+            }
+        }
+
+        /// <summary>
+        ///  Image number. Used for animating the image
+        /// </summary>
         private int _imagePos;
 
         public int ImagePos
@@ -57,28 +81,45 @@ namespace BallAndRock
             }
         }
 
+        /// <summary>
+        /// Ball image file name
+        /// </summary>
+        private string _ballFile;
 
-        private string _color;
-        public string Color
+        public string BallFile
         {
-            get { return _color; }
+            get { return _ballFile; }
             set
             {
-                this._color = value;
-                NotifyPropertyChanged("Color");
+                this._ballFile = value;
+                NotifyPropertyChanged("BallFile");
             }
         }
 
-        public Ball(int x, int y, int size, string color)
+        /// <summary>
+        /// Class Constructor
+        /// </summary>
+        /// <param name="x">X Coordinate</param>
+        /// <param name="y">Y Coordinate</param>
+        /// <param name="size">Image Size</param>
+        /// <param name="speed">Speed</param>
+        /// <param name="fileName">Name of image file</param>
+        public Ball(int x, int y, int size, int speed, string fileName)
         {
             this._x = x;
             this._y = y;
             this._size = size;
-            this._color = color;
+            this._speed = speed;
+            this._ballFile = fileName;
             this._imagePos = 0;
         }
 
+        #endregion Properties & Constructors
+
+        #region PropertyChanged
+
         public event PropertyChangedEventHandler PropertyChanged;
+
         private void NotifyPropertyChanged(string propertyName)
         {
             if (PropertyChanged != null)
@@ -86,5 +127,7 @@ namespace BallAndRock
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+
+        #endregion PropertyChanged
     }
 }

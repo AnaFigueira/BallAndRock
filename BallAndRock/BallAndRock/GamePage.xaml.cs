@@ -2,27 +2,17 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Threading.Tasks;
 using Windows.Devices.Sensors;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.Graphics.Display;
 using Windows.Phone.UI.Input;
-using Windows.Storage.Streams;
 using Windows.UI.Core;
+using Windows.UI.Popups;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
-
 
 namespace BallAndRock
 {
@@ -33,34 +23,53 @@ namespace BallAndRock
     {
         #region Properties and Variables
 
-        Dictionary<int, string> colors = null;
-        private Stopwatch _timer;
-        private long lastMiliseconds = 0;
-        private const int ballSize = 50;
-        private const int rockSize = 50;
-        private int screenHeight = 0;
-        private int minWidth = -15;
-        private int screenWidth = 0;
-        private Ball ball;
-        private int _maxSpeed=15;
-        private int _minSpeed = 1; 
-        private int _maxRocks = 10;
+        #region Rock Properties
+
+        private const int _maxSpeed = 15;
+        private const int _minSpeed = 1;
+        private const int rockSize = 30;
+        private const int _maxRocks = 10;
+        private const int _rockInitPos = -50;
         private int _nRocks = 1;
         private int _totalRocks = 0;
-        private int _score = 0;
-        private bool _isPlaying = false;
-
+        private Dictionary<int, string> _rockTypes = null;
         private Dictionary<Rock, Image> RockImages;
-        
-        private NavigationHelper navigationHelper;
-        private ObservableDictionary defaultViewModel = new ObservableDictionary();
-        private Accelerometer _accelerometer;
+
+        #endregion Rock Properties
+
+        #region Ball Properties
+
+        private const int ballSize = 52;
+        private int _ballMinSpeed = 0;
+        private int _ballMaxSpeed = 1;
+        private int ballHeight;
+        private Ball ball;
+
+        #endregion Ball Properties
+
+        #region Screen properties
+
+        private int screenHeight = 0;
+        private int screenWidth = 0;
+        private int minWidth =0;
+
+        #endregion Screen properties
+
+        #region Others
 
         private DispatcherTimer timer;
-
+        private Stopwatch _timer;
+        private long _lastMiliseconds = 0;
+        private int _score = 0;
+        private Accelerometer _accelerometer;
         private Random rand;
+        private bool _gameOver = false;
+        private NavigationHelper navigationHelper;
+        private ObservableDictionary defaultViewModel = new ObservableDictionary();
 
-        #endregion
+        #endregion Others
+
+        #endregion Properties and Variables
 
         public GamePage()
         {
@@ -72,11 +81,12 @@ namespace BallAndRock
 
             HideStatusBar();
             rand = new Random((int)DateTime.Now.Ticks);
-            LoadColors();
+            LoadRockTypes();
             _timer = new Stopwatch();
             _timer.Start();
             _accelerometer = Accelerometer.GetDefault();
-            if(_accelerometer!=null)
+
+            if (_accelerometer != null)
             {
                 uint minReportInterval = _accelerometer.MinimumReportInterval;
                 uint reportInterval = minReportInterval > 16 ? minReportInterval : 16;
@@ -85,20 +95,141 @@ namespace BallAndRock
             }
             else
             {
-                //TODO: Display Error message and don't proceed.
+                Frame rootFrame = Window.Current.Content as Frame;
+                if (rootFrame != null && rootFrame.CanGoBack)
+                {
+                    rootFrame.GoBack();
+                }
             }
 
-
             timer = new DispatcherTimer();
-            timer.Tick += timer_Tick; 
+            timer.Tick += timer_Tick;
             timer.Interval = new TimeSpan(0, 0, 0, 0, rand.Next(1, 1500));
             timer.Start();
 
             CompositionTarget.Rendering += GameLoop;
-            _isPlaying = true;
         }
 
-        void timer_Tick(object sender, object e)
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            //HardwareButtons.BackPressed += HardwareButtons_BackPressed;
+        }
+
+        private void uiCanvas_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Must use ActualHeight/ActualWidth
+            screenHeight = (int)this.ActualHeight;//uiCanvas.ActualHeight + 50;
+            screenWidth = (int)this.ActualWidth-65;//uiCanvas.ActualWidth - 50;
+
+            // Initialize ball to be in the center of the screen at the bottom
+            ballHeight = screenHeight - ballSize -15;
+            ball = new Ball(screenWidth / 2, ballHeight, ballSize, 0,"2.png");
+            // Set and display ball in the canvas
+            uiImgBall.SetValue(Canvas.LeftProperty, ball.X);
+            uiImgBall.SetValue(Canvas.TopProperty, ball.Y);
+            uiImgBall.Source = new BitmapImage(new Uri("ms-appx://MyAssembly/Content/Sprites/" + ball.BallFile));
+
+            //Initialize the dictionary that will hold the rocks
+            RockImages = new Dictionary<Rock, Image>();
+        }
+
+        /// <summary>
+        /// Game Loop
+        /// </summary>
+        private void GameLoop(object sender, object e)
+        {
+            if(!_gameOver)
+            {
+                // Update ball position
+                if (ball.X <= minWidth) ball.X = minWidth;
+                if (ball.X > screenWidth) ball.X = screenWidth;
+
+                uiImgBall.SetValue(Canvas.LeftProperty, ball.X);
+                uiImgBall.SetValue(Canvas.TopProperty, ball.Y);
+
+                // Rocks
+
+                // Check for Collisions
+                for (int i = 0; i < RockImages.Count; i++)
+                {
+                    Rock rock = RockImages.ElementAt(i).Key;
+                    if (ball.X > rock.X)
+                    {
+                        if (ball.X - rock.X < (0.5 * ball.Size) + (0.5 * rock.Size) &&
+                           ball.Y - rock.Y < (0.5 * ball.Size) + (0.5 * rock.Size))
+                        {
+                            _gameOver = true;
+                            CompositionTarget.Rendering -= GameLoop;
+                            Frame.Navigate(typeof(MessageInfoPage),
+                                new MessageParameters("Game Over!",
+                                "Sorry! Play again?", true, true));
+                        }
+                    }
+                    if(ball.X < rock.X)
+                    {
+                        if (rock.X - ball.X < (0.5 * ball.Size) + (0.5 * rock.Size) &&
+                           rock.Y -ball.Y < (0.5 * ball.Size) + (0.5 * rock.Size))
+                        {
+                            _gameOver = true;
+                            CompositionTarget.Rendering -= GameLoop;
+                            Frame.Navigate(typeof(MessageInfoPage),
+                                new MessageParameters("Game Over!",
+                                "Sorry! Play again?", true, true));
+                        }
+                    }
+                }
+
+                // Update Rocks
+
+                // Increases the number of rocks by one every 5 seconds until max number of rocks is reached.
+                if (_timer.ElapsedMilliseconds - _lastMiliseconds > 5000)
+                {
+                    if (_nRocks < _maxRocks)
+                        _nRocks++;
+
+                    _lastMiliseconds = _timer.ElapsedMilliseconds;
+                }
+
+                List<Rock> toBeRemoved = new List<Rock>();
+                for (int i = 0; i < RockImages.Count; i++)
+                {
+                    RockImages.ElementAt(i).Key.Y += RockImages.ElementAt(i).Key.Speed;
+                    RockImages.ElementAt(i).Key.ImagePos++;
+
+                    if (RockImages.ElementAt(i).Key.ImagePos == 10)
+                        RockImages.ElementAt(i).Key.ImagePos = 0;
+
+                    // If rock passed the screen (reached the bottom), remove ball
+                    if (RockImages.ElementAt(i).Key.Y >= screenHeight)
+                    {
+                        _score++;
+                        uiTbScore.Text = _score.ToString();
+                        IEnumerable<Image> images = uiCanvas.Children.OfType<Image>();
+                        foreach (Image c in images)
+                        {
+                            if (c.Name == RockImages.ElementAt(i).Value.Name)
+                            {
+                                uiCanvas.Children.Remove(c); // Removes ball from canvas
+                                toBeRemoved.Add(RockImages.ElementAt(i).Key);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        RockImages.ElementAt(i).Value.SetValue(Canvas.LeftProperty, RockImages.ElementAt(i).Key.X);
+                        RockImages.ElementAt(i).Value.SetValue(Canvas.TopProperty, RockImages.ElementAt(i).Key.Y);
+                    }
+                }
+                // Remove rocks from dictionary
+                foreach (var r in toBeRemoved)
+                    RockImages.Remove(r);
+            }
+        }
+
+        /// <summary>
+        /// Randomly creates a new rock to be released in game
+        /// </summary>
+        private void timer_Tick(object sender, object e)
         {
             if (RockImages.Count < _nRocks)
             {
@@ -107,163 +238,95 @@ namespace BallAndRock
             timer.Interval = new TimeSpan(0, 0, 0, 0, rand.Next(1, 1000));
         }
 
-
-
-
-
-        async void _accelerometer_ReadingChanged(Accelerometer sender, AccelerometerReadingChangedEventArgs args)
+        /// <summary>
+        ///
+        /// </summary>
+        private async void _accelerometer_ReadingChanged(Accelerometer sender, AccelerometerReadingChangedEventArgs args)
         {
             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
-                if(ball!=null)
+                if (ball != null)
                 {
                     AccelerometerReading reading = args.Reading;
-                    ball.X += (int)(reading.AccelerationX  * 100);
+                    double acel = reading.AccelerationX;
+                    double initSpeed = ball.Speed;
+                    int initX = ball.X;
+                    uint t = _accelerometer.ReportInterval;
+
+                    ball.Speed += (double)(acel * t);
+
+                    if (ball.Speed > _ballMaxSpeed)
+                        ball.Speed = _ballMaxSpeed;
+                    ball.X += (int)(acel * 100);
+                    //ball.X = (int( initX + initSpeed + ((0.5) * acel * (t * t)));
                 }
             });
         }
 
-        void LoadColors()
-        {
-            colors = new Dictionary<int, string>();
-            colors.Add(0, "a1000");
-            colors.Add(1, "a3000");
-            colors.Add(2, "a4000");
-            colors.Add(3, "b1000");
-            colors.Add(4, "b3000");
-            colors.Add(5, "b4000");
-        }
-
-        private void GameLoop(object sender, object e)
-        {
-            if (ball.X <= minWidth ) ball.X = minWidth;
-            if (ball.X > screenWidth) ball.X = screenWidth;
-
-            uiImgBall.SetValue(Canvas.LeftProperty, ball.X);
-            uiImgBall.SetValue(Canvas.TopProperty, ball.Y);
-
-            if(_timer.ElapsedMilliseconds - lastMiliseconds > 5000)
-            {
-                if(_nRocks < _maxRocks)
-                    _nRocks++;
-                
-                lastMiliseconds = _timer.ElapsedMilliseconds;
-            }
-            List<Rock> toBeRemoved = new List<Rock>();
-            for (int i = 0; i < RockImages.Count; i++)
-            {
-                RockImages.ElementAt(i).Key.Y += RockImages.ElementAt(i).Key.Speed;
-                RockImages.ElementAt(i).Key.ImagePos++;
-
-                if (RockImages.ElementAt(i).Key.ImagePos == 10)
-                    RockImages.ElementAt(i).Key.ImagePos = 0;
-
-                if (RockImages.ElementAt(i).Key.Y >= screenHeight)
-                {
-                    _score++;
-                    uiTbScore.Text = _score.ToString();
-                    IEnumerable<Image> images = uiCanvas.Children.OfType<Image>();
-                    foreach (Image c in images)
-                     {
-                        
-                         if (c.Name == RockImages.ElementAt(i).Value.Name)
-                         {
-                            uiCanvas.Children.Remove(c);
-                            toBeRemoved.Add(RockImages.ElementAt(i).Key);
-                         }
-                     }
-                }
-                else
-                {
-                    RockImages.ElementAt(i).Value.SetValue(Canvas.LeftProperty, RockImages.ElementAt(i).Key.X);
-                    RockImages.ElementAt(i).Value.SetValue(Canvas.TopProperty, RockImages.ElementAt(i).Key.Y);
-                }
-            }
-
-            foreach(var r in toBeRemoved)
-            {
-               
-                RockImages.Remove(r);
-            }
-
-
-            //uiImgRock.Source = new BitmapImage(new Uri("ms-appx://MyAssembly/Content/Sprites/"+ rock.Color + rock.ImagePos + ".png"));
-        }
-
-        void AddRock()
+        /// <summary>
+        /// Function that adds a new rock to the Canvas.
+        /// The generated rock is put at a random start at the top of the canvas.
+        /// The speed is random, as well as the image.
+        /// </summary>
+        private void AddRock()
         {
             _totalRocks++;
-            RockImages.Add(new Rock(_totalRocks, rand.Next(minWidth, screenWidth), -50, rockSize, rand.Next(_minSpeed, _maxSpeed), colors[rand.Next(0, 5)]), new Image() { Name = _totalRocks.ToString() });
+            RockImages.Add(new Rock(_totalRocks, rand.Next(minWidth, screenWidth), _rockInitPos, rockSize, rand.Next(_minSpeed, _maxSpeed), _rockTypes[rand.Next(0, _rockTypes.Count-1)]), new Image() { Name = _totalRocks.ToString() });
 
             Rock rock = RockImages.Keys.Where(i => i.RockNumber == _totalRocks).First();
 
             RockImages.Values.Where(i => i.Name == _totalRocks.ToString()).First().SetValue(Canvas.LeftProperty, rock.X);
             RockImages.Values.Where(i => i.Name == _totalRocks.ToString()).First().SetValue(Canvas.TopProperty, rock.Y);
-            RockImages.Values.Where(i => i.Name == _totalRocks.ToString()).First().Source = new BitmapImage(new Uri("ms-appx://MyAssembly/Content/Sprites/" + rock.Color + "0.png"));
+            RockImages.Values.Where(i => i.Name == _totalRocks.ToString()).First().Source = new BitmapImage(new Uri("ms-appx://MyAssembly/Content/Sprites/" + rock.RockType + "0.png"));
 
             uiCanvas.Children.Add(RockImages.Values.Where(i => i.Name == _totalRocks.ToString()).FirstOrDefault());
         }
 
-
-        void HardwareButtons_BackPressed(object sender, BackPressedEventArgs e)
+        /// <summary>
+        /// Loads the dictionary with the color
+        /// </summary>
+        private void LoadRockTypes()
         {
-            Frame rootFrame = Window.Current.Content as Frame;
-            if (rootFrame != null && rootFrame.CanGoBack)
-            {
-                rootFrame.GoBack();
-                e.Handled = true;
-            }
+            _rockTypes = new Dictionary<int, string>();
+            _rockTypes.Add(0, "a1000");
+            _rockTypes.Add(1, "a3000");
+            _rockTypes.Add(2, "a4000");
+            _rockTypes.Add(3, "b1000");
+            _rockTypes.Add(4, "b3000");
+            _rockTypes.Add(5, "b4000");
         }
 
-        
-        private void uiCanvas_Loaded(object sender, RoutedEventArgs e)
-        {
-            // Must use ActualHeight/ActualWidth
-            screenHeight = (int)uiCanvas.ActualHeight+50;
-            screenWidth = (int)uiCanvas.ActualWidth - 50;
-            int ballHeight = screenHeight - 75;
-            // Initialize ball to be in the center of the screen
-            
-            ball = new Ball(screenWidth / 2, ballHeight, ballSize, colors[rand.Next(0,5)]);
-            uiImgBall.SetValue(Canvas.LeftProperty, ball.X);
-            uiImgBall.SetValue(Canvas.TopProperty, ball.Y);
-
-            uiImgBall.Source = new BitmapImage(new Uri("ms-appx://MyAssembly/Content/Sprites/" + ball.Color + "0.png"));
-
-            RockImages = new Dictionary<Rock, Image>();
-        }
-
-
+        /// <summary>
+        /// Hides the Windows status bar
+        /// </summary>
         private async void HideStatusBar()
         {
             var statusBar = StatusBar.GetForCurrentView();
             await statusBar.HideAsync();
         }
 
+        /// <summary>
+        /// Displays a status bar that is incorporated into the app background
+        /// </summary>
         private void DiscreteStatusBar()
         {
             ApplicationView.GetForCurrentView().SetDesiredBoundsMode(ApplicationViewBoundsMode.UseCoreWindow);
         }
 
-        private void Page_Loaded(object sender, RoutedEventArgs e)
-        {
-            HardwareButtons.BackPressed += HardwareButtons_BackPressed;
-        }
-
-        private void ReleaseRock()
-        {
-            int column = rand.Next(1, 7);
-            BitmapImage image = new BitmapImage(new Uri("ms-resource://MyAssembly/Content/Sprites/a10000.png"));
-
-            image.SetValue(Grid.RowProperty, 0);
-            image.SetValue(Grid.ColumnProperty, column);
-        }
-
-
-
-
-
         #region Navigation
+        ///// <summary>
+        ///// Back button override
+        ///// </summary>
+        //private void HardwareButtons_BackPressed(object sender, BackPressedEventArgs e)
+        //{
+        //    Frame rootFrame = Window.Current.Content as Frame;
+        //    if (rootFrame != null && rootFrame.CanGoBack)
+        //    {
+        //        rootFrame.GoBack();
+        //        e.Handled = true;
+        //    }
+        //}
+
         /// <summary>
         /// Gets the <see cref="NavigationHelper"/> associated with this <see cref="Page"/>.
         /// </summary>
@@ -314,10 +377,10 @@ namespace BallAndRock
         /// The methods provided in this section are simply used to allow
         /// NavigationHelper to respond to the page's navigation methods.
         /// <para>
-        /// Page specific logic should be placed in event handlers for the  
+        /// Page specific logic should be placed in event handlers for the
         /// <see cref="NavigationHelper.LoadState"/>
         /// and <see cref="NavigationHelper.SaveState"/>.
-        /// The navigation parameter is available in the LoadState method 
+        /// The navigation parameter is available in the LoadState method
         /// in addition to page state preserved during an earlier session.
         /// </para>
         /// </summary>
@@ -330,15 +393,13 @@ namespace BallAndRock
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
+            _gameOver = true;
+            CompositionTarget.Rendering -= GameLoop;
             this.navigationHelper.OnNavigatedFrom(e);
         }
 
-        #endregion
+        #endregion NavigationHelper registration
 
-
-        #endregion
-
-       
-       
+        #endregion Navigation
     }
 }

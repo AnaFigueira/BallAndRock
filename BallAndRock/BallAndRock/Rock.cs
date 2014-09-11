@@ -1,11 +1,16 @@
 ﻿using System.ComponentModel;
-using Windows.UI.Xaml.Media.Imaging;
 
 namespace BallAndRock
 {
     public class Rock : INotifyPropertyChanged
     {
+        #region Properties & constructors
+
+        /// <summary>
+        /// Rock number. Works as an id.
+        /// </summary>
         private int _rockNumber;
+
         public int RockNumber
         {
             get { return _rockNumber; }
@@ -16,7 +21,11 @@ namespace BallAndRock
             }
         }
 
+        /// <summary>
+        /// X Coordinate
+        /// </summary>
         private int _x;
+
         public int X
         {
             get { return _x; }
@@ -27,6 +36,9 @@ namespace BallAndRock
             }
         }
 
+        /// <summary>
+        /// Y Coordinate
+        /// </summary>
         private int _y;
 
         public int Y
@@ -38,6 +50,10 @@ namespace BallAndRock
                 NotifyPropertyChanged("Y");
             }
         }
+
+        /// <summary>
+        /// Rock Size e.g., 50x50
+        /// </summary>
         private int _size;
 
         public int Size
@@ -50,6 +66,9 @@ namespace BallAndRock
             }
         }
 
+        /// <summary>
+        /// Rock Speed
+        /// </summary>
         private int _speed;
 
         public int Speed
@@ -62,6 +81,9 @@ namespace BallAndRock
             }
         }
 
+        /// <summary>
+        /// Image number. For each set of rocktype there are 10 images.
+        /// </summary>
         private int _imagePos;
 
         public int ImagePos
@@ -75,16 +97,17 @@ namespace BallAndRock
         }
 
         /// <summary>
-        /// 
+        /// Type of the rock. There are 6 different types
         /// </summary>
-        private string _color;
-        public string Color
+        private string _rockType;
+
+        public string RockType
         {
-            get { return _color; }
+            get { return _rockType; }
             set
             {
-                this._color = value;
-                NotifyPropertyChanged("Color");
+                this._rockType = value;
+                NotifyPropertyChanged("RockType");
             }
         }
 
@@ -96,8 +119,8 @@ namespace BallAndRock
         /// <param name="y">Y position of the rock</param>
         /// <param name="size">Size of the rock image</param>
         /// <param name="speed">Initial speed of the rock</param>
-        /// <param name="color">String to identify the color file name</param>
-        public Rock(int rockNumber, int x, int y, int size, int speed, string color)
+        /// <param name="color">String to identify the rocktype file name</param>
+        public Rock(int rockNumber, int x, int y, int size, int speed, string rockType)
         {
             this._rockNumber = rockNumber;
             this._x = x;
@@ -105,8 +128,12 @@ namespace BallAndRock
             this._size = size;
             this._speed = speed;
             this._imagePos = 0;
-            this._color = color;
+            this._rockType = rockType;
         }
+
+        #endregion Properties & constructors
+
+        #region PropertyChanged
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -117,5 +144,7 @@ namespace BallAndRock
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+
+        #endregion PropertyChanged
     }
 }
