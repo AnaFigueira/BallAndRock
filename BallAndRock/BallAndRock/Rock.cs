@@ -74,6 +74,9 @@ namespace BallAndRock
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private string _color;
         public string Color
         {
@@ -85,6 +88,15 @@ namespace BallAndRock
             }
         }
 
+        /// <summary>
+        /// Class Constructor
+        /// </summary>
+        /// <param name="rockNumber">Number of the rock (id)</param>
+        /// <param name="x">X position of the rock</param>
+        /// <param name="y">Y position of the rock</param>
+        /// <param name="size">Size of the rock image</param>
+        /// <param name="speed">Initial speed of the rock</param>
+        /// <param name="color">String to identify the color file name</param>
         public Rock(int rockNumber, int x, int y, int size, int speed, string color)
         {
             this._rockNumber = rockNumber;

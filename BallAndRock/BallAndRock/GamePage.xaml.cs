@@ -31,17 +31,19 @@ namespace BallAndRock
     /// </summary>
     public sealed partial class GamePage : Page
     {
+        #region Properties and Variables
+
         Dictionary<int, string> colors = null;
         private Stopwatch _timer;
         private long lastMiliseconds = 0;
         private const int ballSize = 50;
         private const int rockSize = 50;
         private int screenHeight = 0;
-        private int minHeight = -50;
         private int minWidth = -15;
         private int screenWidth = 0;
         private Ball ball;
-        private int _speed=5;
+        private int _maxSpeed=15;
+        private int _minSpeed = 1; 
         private int _maxRocks = 10;
         private int _nRocks = 1;
         private int _totalRocks = 0;
@@ -53,7 +55,12 @@ namespace BallAndRock
         private NavigationHelper navigationHelper;
         private ObservableDictionary defaultViewModel = new ObservableDictionary();
         private Accelerometer _accelerometer;
-        Random rand;
+
+        private DispatcherTimer timer;
+
+        private Random rand;
+
+        #endregion
 
         public GamePage()
         {
@@ -81,9 +88,28 @@ namespace BallAndRock
                 //TODO: Display Error message and don't proceed.
             }
 
+
+            timer = new DispatcherTimer();
+            timer.Tick += timer_Tick; 
+            timer.Interval = new TimeSpan(0, 0, 0, 0, rand.Next(1, 1500));
+            timer.Start();
+
             CompositionTarget.Rendering += GameLoop;
             _isPlaying = true;
         }
+
+        void timer_Tick(object sender, object e)
+        {
+            if (RockImages.Count < _nRocks)
+            {
+                AddRock();
+            }
+            timer.Interval = new TimeSpan(0, 0, 0, 0, rand.Next(1, 1000));
+        }
+
+
+
+
 
         async void _accelerometer_ReadingChanged(Accelerometer sender, AccelerometerReadingChangedEventArgs args)
         {
@@ -116,23 +142,17 @@ namespace BallAndRock
             uiImgBall.SetValue(Canvas.LeftProperty, ball.X);
             uiImgBall.SetValue(Canvas.TopProperty, ball.Y);
 
-            if(_timer.ElapsedMilliseconds - lastMiliseconds > 2000)
+            if(_timer.ElapsedMilliseconds - lastMiliseconds > 5000)
             {
-                if(_speed<20)
-                    _speed++;
                 if(_nRocks < _maxRocks)
                     _nRocks++;
-                if (RockImages.Count < _nRocks)
-                {
-                    for (int i = 0; i < _nRocks; i++ )
-                        AddRock();
-                }
+                
                 lastMiliseconds = _timer.ElapsedMilliseconds;
             }
             List<Rock> toBeRemoved = new List<Rock>();
             for (int i = 0; i < RockImages.Count; i++)
             {
-                RockImages.ElementAt(i).Key.Y += _speed;
+                RockImages.ElementAt(i).Key.Y += RockImages.ElementAt(i).Key.Speed;
                 RockImages.ElementAt(i).Key.ImagePos++;
 
                 if (RockImages.ElementAt(i).Key.ImagePos == 10)
@@ -173,7 +193,7 @@ namespace BallAndRock
         void AddRock()
         {
             _totalRocks++;
-            RockImages.Add(new Rock(_totalRocks, rand.Next(minWidth, screenWidth), -50, rockSize, _speed, colors[rand.Next(0, 5)]), new Image() {Name= _totalRocks.ToString()});
+            RockImages.Add(new Rock(_totalRocks, rand.Next(minWidth, screenWidth), -50, rockSize, rand.Next(_minSpeed, _maxSpeed), colors[rand.Next(0, 5)]), new Image() { Name = _totalRocks.ToString() });
 
             Rock rock = RockImages.Keys.Where(i => i.RockNumber == _totalRocks).First();
 
@@ -211,14 +231,6 @@ namespace BallAndRock
             uiImgBall.Source = new BitmapImage(new Uri("ms-appx://MyAssembly/Content/Sprites/" + ball.Color + "0.png"));
 
             RockImages = new Dictionary<Rock, Image>();
-
-            Rock rock = new Rock(_totalRocks, minWidth, 200, rockSize, 1, colors[rand.Next(0, 5)]);
-            Image rockimg= new Image();
-
-            rockimg.SetValue(Canvas.LeftProperty, rock.X);
-            rockimg.SetValue(Canvas.TopProperty, rock.Y);
-            uiCanvas.Children.Add(rockimg);
-            rockimg.Source = new BitmapImage(new Uri("ms-appx://MyAssembly/Content/Sprites/" + rock.Color + "0.png"));
         }
 
 
