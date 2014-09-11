@@ -31,7 +31,6 @@ namespace BallAndRock
         {
             this.InitializeComponent();
 
-
             HideStatusBar();
 
             // Locks portrait mode for all application. Global setting.
@@ -40,17 +39,20 @@ namespace BallAndRock
             this.NavigationCacheMode = NavigationCacheMode.Required;
         }
 
-        void HardwareButtons_BackPressed(object sender, BackPressedEventArgs e)
-        {
-            Frame rootFrame = Window.Current.Content as Frame;
-            if (rootFrame != null && rootFrame.CanGoBack)
-            {
 
-                rootFrame.GoBack();
-                e.Handled = true;
-            }
 
-        }
+        //void HardwareButtons_BackPressed(object sender, BackPressedEventArgs e)
+        //{
+        //    Frame rootFrame = Window.Current.Content as Frame;
+        //    if (rootFrame != null && rootFrame.CanGoBack)
+        //    {
+
+        //        rootFrame.GoBack();
+        //        e.Handled = true;
+
+        //    }
+
+        //}
 
         /// <summary>
         /// Function that hides the status bar.
@@ -103,7 +105,7 @@ namespace BallAndRock
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            HardwareButtons.BackPressed += HardwareButtons_BackPressed;
+            //HardwareButtons.BackPressed += HardwareButtons_BackPressed;
         }
 
         #region Navigation
