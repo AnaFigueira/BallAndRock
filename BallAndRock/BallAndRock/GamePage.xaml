@@ -5,31 +5,28 @@
     xmlns:local="using:BallAndRock"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    Loaded="Page_Loaded" >
+    mc:Ignorable="d">
 
     <Grid x:Name="uiGridContent">
-    	
+
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <MediaElement x:Name="uiExplosionSound" AudioCategory="GameEffects" Source="Sounds/explosion.wav" AutoPlay="False" Visibility="Collapsed"/>
-        <MediaElement x:Name="uiSurvivedSound" AudioCategory="GameEffects" Source="Sounds/beep1.wav" AutoPlay="False" Visibility="Collapsed"/>
+        <MediaElement x:Name="uiExplosionSound" AudioCategory="GameEffects" Source="Sounds/explosion.wav" AutoPlay="False" Visibility="Collapsed" Volume="2" />
 
+        <MediaElement x:Name="uiSurvivedSound" AudioCategory="GameEffects" Source="Sounds/beep1.wav" AutoPlay="False" Visibility="Collapsed" Volume="2" />
 
         <Canvas x:Name="uiCanvas" Grid.RowSpan="1" Loaded="uiCanvas_Loaded" Grid.Row="0">
             <Canvas.Background>
-                <ImageBrush Stretch="Fill" ImageSource="Assets/background.png"/>
+                <ImageBrush Stretch="Fill" ImageSource="Assets/background.png" />
             </Canvas.Background>
-        
-            <StackPanel Margin="0,0,0,0.0" Orientation="Horizontal" Grid.ColumnSpan="2">
-                <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Score: " VerticalAlignment="Top" FontSize="24" Width="70"/>
 
-                <TextBlock x:Name="uiTbScore" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="24"/>
+            <StackPanel Margin="0,0,0,0.0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Score: " VerticalAlignment="Top" FontSize="24" Width="70" />
+
+                <TextBlock x:Name="uiTbScore" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="24" />
             </StackPanel>
         </Canvas>
-
     </Grid>
-
 </Page>

@@ -55,13 +55,7 @@ namespace BallAndRock
         /// This parameter is typically used to configure the page.</param>
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            // TODO: Prepare page for display here.
 
-            // TODO: If your application contains multiple pages, ensure that you are
-            // handling the hardware Back button by registering for the
-            // Windows.Phone.UI.Input.HardwareButtons.BackPressed event.
-            // If you are using the NavigationHelper provided by some templates,
-            // this event is handled for you.
         }
 
         private void uiBtStartGame_Click(object sender, RoutedEventArgs e)
@@ -81,7 +75,8 @@ namespace BallAndRock
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            if (Accelerometer.GetDefault() == null)
+            // Should be handled by the store, but just in case
+            if (Accelerometer.GetDefault() == null) 
             {
                 uiBtStartGame.IsEnabled = false;
                 uiTbInfo.Text = "Your phone doesn't support this game because it doesn't have an accelerometer. Sorry!";
@@ -111,13 +106,6 @@ namespace BallAndRock
         /// Populates the page with content passed during navigation.  Any saved state is also
         /// provided when recreating a page from a prior session.
         /// </summary>
-        /// <param name="sender">
-        /// The source of the event; typically <see cref="NavigationHelper"/>
-        /// </param>
-        /// <param name="e">Event data that provides both the navigation parameter passed to
-        /// <see cref="Frame.Navigate(Type, Object)"/> when this page was initially requested and
-        /// a dictionary of state preserved by this page during an earlier
-        /// session.  The state will be null the first time a page is visited.</param>
         private void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
         }
@@ -127,9 +115,7 @@ namespace BallAndRock
         /// page is discarded from the navigation cache.  Values must conform to the serialization
         /// requirements of <see cref="SuspensionManager.SessionState"/>.
         /// </summary>
-        /// <param name="sender">The source of the event; typically <see cref="NavigationHelper"/></param>
-        /// <param name="e">Event data that provides an empty dictionary to be populated with
-        /// serializable state.</param>
+
         private void NavigationHelper_SaveState(object sender, SaveStateEventArgs e)
         {
         }

@@ -6,26 +6,19 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" FontFamily="Segoe UI Light" Loaded="Page_Loaded">
-
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" FontFamily="Segoe UI Light">
 
     <Grid>
-        
+
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="Ball and Rock" VerticalAlignment="Center" FontSize="48" Margin="0" Grid.Row="0"/>
-        <TextBlock x:Name="uiTbTitle" HorizontalAlignment="Center" TextWrapping="Wrap" Text="TextBlock"  VerticalAlignment="Center" FontSize="36" Margin="0" Foreground="#FF990000" Grid.Row="1"/>
-        <TextBlock x:Name="uiTbMessage" HorizontalAlignment="Center" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Center" FontSize="24" Margin="0" Grid.Row="2"/>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,50" Grid.Row="3">
-            <Button x:Name="uiBtAccept" Content="Yes" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,0,25,0" Click="uiBtAccept_Click" Width="150" Height="100" FontSize="36"/>
-            <Button x:Name="uiBtCancel" Content="No" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,0,0.333,0" Click="uiBtCancel_Click" FontSize="36" Width="150" Height="100"/>
 
-        </StackPanel>
-
+        <TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="Ball and Rock" VerticalAlignment="Center" FontSize="56" Margin="0" Grid.Row="0" />
+        <TextBlock x:Name="uiTbTitle" HorizontalAlignment="Center" TextWrapping="Wrap" Text="TextBlock"  VerticalAlignment="Center" FontSize="48" Margin="0" Foreground="#FF990000" Grid.Row="1" />
+        <TextBlock x:Name="uiTbMessage" HorizontalAlignment="Center" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Center" FontSize="36" Margin="0,15,0,0" Grid.Row="2" />
     </Grid>
 </Page>

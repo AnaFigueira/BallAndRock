@@ -1,0 +1,2 @@
+MainPackage=D:\Code\BallAndRock\BallAndRock\BallAndRock\bin\Release\BallAndRock_1.0.0.0_Bundle\BallAndRock_1.0.0.0_AnyCPU.appx
+SymbolPackage=D:\Code\BallAndRock\BallAndRock\BallAndRock\AppPackages\BallAndRock_1.0.0.0_Test\BallAndRock_1.0.0.0_AnyCPU.appxsym

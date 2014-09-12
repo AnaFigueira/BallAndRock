@@ -21,27 +21,27 @@ namespace BallAndRock
 
         #region Rock Properties
 
-        private const int _maxSpeed = 15;
-        private const int _minSpeed = 1;
-        private const int _rockSize = 25;
-        private const int _maxRocks = 10;
-        private const double _rockInitPos = -50;
-        private int _nRocks = 1;
-        private int _totalRocks = 0;
-        private Dictionary<string, BitmapImage> _rockTypes = null;
-        private Dictionary<Rock, Image> RockImages;
+        private const int _maxSpeed = 15; // Max speed for rocks
+        private const int _minSpeed = 1; // Min speed for rocks
+        private const int _rockSize = 25; // 25x25 pixels
+        private const int _maxRocks = 6; // Max number of rocks at the same time on screen
+        private const double _rockInitPos = -50; // Positions rock outside of canvas
+        private int _nRocks = 0; // Current number of rocks
+        private int _totalRocks = 0; // Serves as a rock id
+        private Dictionary<string, BitmapImage> _rockTypes = null; // Holds the bitmapImages for the rocks
+        private Dictionary<Rock, Image> RockImages; // Holds the rocks and respective Images present in the Canvas
+        private int _nImagesPerRock = 5; // Number of images per rock
 
         #endregion Rock Properties
 
         #region Ball Properties
 
-        private const double ballSize = 60;
-        private double ballHeight;
-        private Ball ball;
-        private Image _imgBall;
-        private int _numberBallImages = 10;
-        private List<BitmapImage> BallImages;
-        private DispatcherTimer _rotateImagesTimer;
+        private const double ballSize = 60; // 60x60 pixels
+        private double ballHeight; // Height at which the ball is placed
+        private Ball ball; // Ball object
+        private Image _imgBall; // Image that holds the ball
+        private int _numberBallImages = 5; // Number of images used to animate the ball
+        private List<BitmapImage> BallImages; // List of ball images
 
         #endregion Ball Properties
 
@@ -55,15 +55,16 @@ namespace BallAndRock
 
         #region Others
 
-        private DispatcherTimer _rockReleaseTimer;
-        private int _score = 0;
-        private Random rand;
-        private bool _gameOver = false;
+        private DispatcherTimer _rotateImagesTimer; // Timer to rotate the images
+        private DispatcherTimer _rockReleaseTimer; // Timer to release rocks
+        private DispatcherTimer _addRockTimer; // Time to add rock
+        private int _score = 0; // Current user score
+        private Random rand; // Pseudo-random source
+        private bool _gameOver = false; // Game over flag
+        private Accelerometer _accelerometer; // Accelerometer
+
         private NavigationHelper navigationHelper;
         private ObservableDictionary defaultViewModel = new ObservableDictionary();
-        private Accelerometer _accelerometer;
-
-        
 
         #endregion Others
 
@@ -71,6 +72,9 @@ namespace BallAndRock
 
         #region Game Methods
 
+        /// <summary>
+        /// Class constructor
+        /// </summary>
         public GamePage()
         {
             this.InitializeComponent();
@@ -78,12 +82,15 @@ namespace BallAndRock
             this.navigationHelper = new NavigationHelper(this);
             this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
             this.navigationHelper.SaveState += this.NavigationHelper_SaveState;
-            LoadBallImages();
-            HideStatusBar();
+
             rand = new Random((int)DateTime.Now.Ticks);
+            HideStatusBar();
+
+            LoadBallImages();
             LoadRockTypes();
 
             _accelerometer = Accelerometer.GetDefault();
+
             if (_accelerometer != null)
             {
                 uint minReportInterval = _accelerometer.MinimumReportInterval;
@@ -91,6 +98,11 @@ namespace BallAndRock
                 _accelerometer.ReportInterval = reportInterval;
                 _accelerometer.ReadingChanged += _accelerometer_ReadingChanged;
             }
+
+            _addRockTimer = new DispatcherTimer();
+            _addRockTimer.Tick += _addRockTimer_Tick;
+            _addRockTimer.Interval = new TimeSpan(0, 0, 0, 0, rand.Next(1, 10000));
+            _addRockTimer.Start();
 
             _rockReleaseTimer = new DispatcherTimer();
             _rockReleaseTimer.Tick += _rockReleaseTimer_Tick;
@@ -105,25 +117,54 @@ namespace BallAndRock
             CompositionTarget.Rendering += GameLoop;
         }
 
+        /// <summary>
+        /// Timer to release rocks.
+        /// </summary>
+        private void _addRockTimer_Tick(object sender, object e)
+        {
+            if (_nRocks < _maxRocks)
+            {
+                _nRocks++;
+                _addRockTimer.Interval = new TimeSpan(0, 0, 0, 0, rand.Next(1, _nRocks * 10000));
+            }
+        }
+
+        /// <summary>
+        /// Handles the rotation of images in order to give some animation to the game.
+        /// </summary>
         private void _rotateImagesTimer_Tick(object sender, object e)
         {
             ball.ImagePos++;
-            if (ball.ImagePos == 10)
+            if (ball.ImagePos == _numberBallImages)
                 ball.ImagePos = 0;
 
             _imgBall.Source = BallImages[ball.ImagePos];
 
             for (int i = 0; i < RockImages.Count; i++)
             {
-                RockImages.ElementAt(i).Key.ImagePos++;
+                Rock rock = RockImages.ElementAt(i).Key;
+                rock.ImagePos++;
 
-                if (RockImages.ElementAt(i).Key.ImagePos == 10)
-                    RockImages.ElementAt(i).Key.ImagePos = 0;
-                string r = RockImages.ElementAt(i).Key.RockType;
+                if (rock.ImagePos == _nImagesPerRock)
+                    rock.ImagePos = 0;
+                string r = rock.RockType;
                 r = r.Remove(r.Length - 1, 1);
-                r += RockImages.ElementAt(i).Key.ImagePos;
+                r += rock.ImagePos;
+                RockImages.ElementAt(i).Key.ImagePos = rock.ImagePos;
                 RockImages.ElementAt(i).Value.Source = _rockTypes[r];
             }
+        }
+
+        /// <summary>
+        /// Randomly creates a new rock to be released in game
+        /// </summary>
+        private void _rockReleaseTimer_Tick(object sender, object e)
+        {
+            if (RockImages.Count < _nRocks)
+            {
+                AddRock();
+            }
+            _rockReleaseTimer.Interval = new TimeSpan(0, 0, 0, 0, rand.Next(1, 1000));
         }
 
         /// <summary>
@@ -157,24 +198,20 @@ namespace BallAndRock
                     if (ball.X < minWidth)
                     {
                         ball.X = minWidth;
-                        ball.Speed = 0;//-ball.Speed; // Bounce
+                        ball.Speed = 0;
                     }
                     if (ball.X > screenWidth)
                     {
                         ball.X = screenWidth;
-                        ball.Speed = 0;//-ball.Speed; // Bounce
+                        ball.Speed = 0;
                     }
                 }
             });
         }
 
-        private void Page_Loaded(object sender, RoutedEventArgs e)
-        {
-  
-        }
-
         private void uiCanvas_Loaded(object sender, RoutedEventArgs e)
         {
+            // Get screen width and height to be used
             screenWidth = Window.Current.Bounds.Width - 65;
             screenHeight = Window.Current.Bounds.Height;
 
@@ -202,11 +239,17 @@ namespace BallAndRock
             }
         }
 
+        /// <summary>
+        /// Updates the score label.
+        /// The number turns green if the previous highscore has been passed.
+        /// </summary>
         private void UpdateScore()
         {
             // Update highscore if new score is higher
             if (_score > Int32.Parse(ApplicationData.Current.LocalSettings.Values["HighScore"].ToString()))
-                uiTbScore.Foreground = new SolidColorBrush(Color.FromArgb(0,0,255,0));
+                uiTbScore.Foreground = new SolidColorBrush(Colors.Green);
+
+            uiTbScore.Text = _score.ToString();
         }
 
         /// <summary>
@@ -230,24 +273,9 @@ namespace BallAndRock
 
                     Frame.Navigate(typeof(MessageInfoPage),
                         new MessageParameters("Game Over!",
-                        "Sorry! Play again?", true, true));
+                        "Play again?", true));
                 }
             }
-        }
-
-        /// <summary>
-        /// Randomly creates a new rock to be released in game
-        /// </summary>
-        private void _rockReleaseTimer_Tick(object sender, object e)
-        {
-            if (_nRocks < _maxRocks)
-                _nRocks++;
-
-            if (RockImages.Count < _nRocks)
-            {
-                AddRock();
-            }
-            _rockReleaseTimer.Interval = new TimeSpan(0, 0, 0, 0, rand.Next(1, 1000));
         }
 
         /// <summary>
@@ -256,7 +284,7 @@ namespace BallAndRock
         private void AddBall()
         {
             ballHeight = screenHeight - ballSize;
-            ball = new Ball(screenWidth / 2, ballHeight, ballSize, 0, "2.png");
+            ball = new Ball(screenWidth / 2, ballHeight, ballSize, 0, "0.png");
             _imgBall = new Image();
             _imgBall.Width = 65;
             _imgBall.Height = 65;
@@ -295,7 +323,7 @@ namespace BallAndRock
 
             RockImages.Values.Where(i => i.Name == _totalRocks.ToString()).First().SetValue(Canvas.LeftProperty, rock.X);
             RockImages.Values.Where(i => i.Name == _totalRocks.ToString()).First().SetValue(Canvas.TopProperty, rock.Y);
-            RockImages.Values.Where(i => i.Name == _totalRocks.ToString()).First().Source = _rockTypes.ElementAt(rand.Next(0, 2)).Value;
+            RockImages.Values.Where(i => i.Name == _totalRocks.ToString()).First().Source = _rockTypes[rock.RockType];
 
             uiCanvas.Children.Add(RockImages.Values.Where(i => i.Name == _totalRocks.ToString()).FirstOrDefault());
         }
@@ -349,7 +377,7 @@ namespace BallAndRock
         {
             _rockTypes = new Dictionary<string, BitmapImage>();
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < _nImagesPerRock; i++)
             {
                 _rockTypes.Add("a1000" + i, new BitmapImage(new Uri("ms-appx://MyAssembly/Content/Sprites/a1000" + i + ".png")));
                 _rockTypes.Add("a3000" + i, new BitmapImage(new Uri("ms-appx://MyAssembly/Content/Sprites/a3000" + i + ".png")));
@@ -384,7 +412,6 @@ namespace BallAndRock
         #endregion Status Bar
 
         #region Navigation
-
 
         /// <summary>
         /// Gets the <see cref="NavigationHelper"/> associated with this <see cref="Page"/>.

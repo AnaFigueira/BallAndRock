@@ -6,22 +6,21 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Loaded="Page_Loaded">
-
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Loaded="Page_Loaded" FontFamily="Segoe UI Light">
 
     <Grid>
         <Grid.Background>
-            <ImageBrush Stretch="Fill" ImageSource="Assets/background.png"/>
+            <ImageBrush Stretch="Fill" ImageSource="Assets/background.png" />
         </Grid.Background>
+        
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <TextBlock TextWrapping="Wrap" Text="Ball And Rock" Grid.Row="0" FontSize="48" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Foreground="White"/>
-        <TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="Game Instructions:" VerticalAlignment="Top" FontSize="24" Margin="0" Grid.Row="1" Foreground="White"/>
-        <TextBlock x:Name="uiTbInstructions" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="24" Margin="0,25,0,0" Grid.Row="2" Foreground="White" TextAlignment="Center"/>
-
+        
+        <TextBlock TextWrapping="Wrap" Text="Ball And Rock" Grid.Row="0" FontSize="48" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Foreground="White" />
+        <TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="Game Instructions:" VerticalAlignment="Top" FontSize="36" Margin="0" Grid.Row="1" Foreground="White" />
+        <TextBlock x:Name="uiTbInstructions" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="24" Margin="0,25,0,0" Grid.Row="2" Foreground="White" TextAlignment="Center" />
     </Grid>
 </Page>

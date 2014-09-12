@@ -1,19 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.Graphics.Display;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 
@@ -36,9 +25,9 @@ namespace BallAndRock
         {
             this.InitializeComponent();
             this.Suspending += this.OnSuspending;
-            
+
             // If highscore doesn't exist, create
-            // Used to save to phone
+            // Saved to phone
             if (Windows.Storage.ApplicationData.Current.LocalSettings.Values["highScore"] == null)
             {
                 Windows.Storage.ApplicationData.Current.LocalSettings.Values["highScore"] = "0";
