@@ -27,7 +27,7 @@ namespace BallAndRock
 
         private const int _maxSpeed = 15;
         private const int _minSpeed = 1;
-        private const int rockSize = 30;
+        private const int rockSize = 25;
         private const int _maxRocks = 10;
         private const int _rockInitPos = -50;
         private int _nRocks = 1;
@@ -39,11 +39,12 @@ namespace BallAndRock
 
         #region Ball Properties
 
-        private const int ballSize = 52;
+        private const int ballSize = 60;
         private int _ballMinSpeed = 0;
         private int _ballMaxSpeed = 1;
         private int ballHeight;
         private Ball ball;
+        private Image _imgBall;
 
         #endregion Ball Properties
 
@@ -122,12 +123,7 @@ namespace BallAndRock
             screenWidth = (int)this.ActualWidth-65;//uiCanvas.ActualWidth - 50;
 
             // Initialize ball to be in the center of the screen at the bottom
-            ballHeight = screenHeight - ballSize -15;
-            ball = new Ball(screenWidth / 2, ballHeight, ballSize, 0,"2.png");
-            // Set and display ball in the canvas
-            uiImgBall.SetValue(Canvas.LeftProperty, ball.X);
-            uiImgBall.SetValue(Canvas.TopProperty, ball.Y);
-            uiImgBall.Source = new BitmapImage(new Uri("ms-appx://MyAssembly/Content/Sprites/" + ball.BallFile));
+            AddBall();
 
             //Initialize the dictionary that will hold the rocks
             RockImages = new Dictionary<Rock, Image>();
@@ -140,89 +136,28 @@ namespace BallAndRock
         {
             if(!_gameOver)
             {
-                // Update ball position
-                if (ball.X <= minWidth) ball.X = minWidth;
-                if (ball.X > screenWidth) ball.X = screenWidth;
+                CheckForCollisions();
+                
+                UpdateBall();
 
-                uiImgBall.SetValue(Canvas.LeftProperty, ball.X);
-                uiImgBall.SetValue(Canvas.TopProperty, ball.Y);
+                UpdateRocks();
+            }
+        }
 
-                // Rocks
-
-                // Check for Collisions
-                for (int i = 0; i < RockImages.Count; i++)
+        private void CheckForCollisions()
+        {
+            for (int i = 0; i < RockImages.Count; i++)
+            {
+                Rock rock = RockImages.ElementAt(i).Key;
+                if (Math.Abs(ball.X - rock.X) < (0.5 * ball.Size) + (0.5 * rock.Size) &&
+                    Math.Abs(ball.Y - rock.Y) < (0.5 * ball.Size) + (0.5 * rock.Size))
                 {
-                    Rock rock = RockImages.ElementAt(i).Key;
-                    if (ball.X > rock.X)
-                    {
-                        if (ball.X - rock.X < (0.5 * ball.Size) + (0.5 * rock.Size) &&
-                           ball.Y - rock.Y < (0.5 * ball.Size) + (0.5 * rock.Size))
-                        {
-                            _gameOver = true;
-                            CompositionTarget.Rendering -= GameLoop;
-                            Frame.Navigate(typeof(MessageInfoPage),
-                                new MessageParameters("Game Over!",
-                                "Sorry! Play again?", true, true));
-                        }
-                    }
-                    if(ball.X < rock.X)
-                    {
-                        if (rock.X - ball.X < (0.5 * ball.Size) + (0.5 * rock.Size) &&
-                           rock.Y -ball.Y < (0.5 * ball.Size) + (0.5 * rock.Size))
-                        {
-                            _gameOver = true;
-                            CompositionTarget.Rendering -= GameLoop;
-                            Frame.Navigate(typeof(MessageInfoPage),
-                                new MessageParameters("Game Over!",
-                                "Sorry! Play again?", true, true));
-                        }
-                    }
+                    _gameOver = true;
+                    CompositionTarget.Rendering -= GameLoop;
+                    Frame.Navigate(typeof(MessageInfoPage),
+                        new MessageParameters("Game Over!",
+                        "Sorry! Play again?", true, true));
                 }
-
-                // Update Rocks
-
-                // Increases the number of rocks by one every 5 seconds until max number of rocks is reached.
-                if (_timer.ElapsedMilliseconds - _lastMiliseconds > 5000)
-                {
-                    if (_nRocks < _maxRocks)
-                        _nRocks++;
-
-                    _lastMiliseconds = _timer.ElapsedMilliseconds;
-                }
-
-                List<Rock> toBeRemoved = new List<Rock>();
-                for (int i = 0; i < RockImages.Count; i++)
-                {
-                    RockImages.ElementAt(i).Key.Y += RockImages.ElementAt(i).Key.Speed;
-                    RockImages.ElementAt(i).Key.ImagePos++;
-
-                    if (RockImages.ElementAt(i).Key.ImagePos == 10)
-                        RockImages.ElementAt(i).Key.ImagePos = 0;
-
-                    // If rock passed the screen (reached the bottom), remove ball
-                    if (RockImages.ElementAt(i).Key.Y >= screenHeight)
-                    {
-                        _score++;
-                        uiTbScore.Text = _score.ToString();
-                        IEnumerable<Image> images = uiCanvas.Children.OfType<Image>();
-                        foreach (Image c in images)
-                        {
-                            if (c.Name == RockImages.ElementAt(i).Value.Name)
-                            {
-                                uiCanvas.Children.Remove(c); // Removes ball from canvas
-                                toBeRemoved.Add(RockImages.ElementAt(i).Key);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        RockImages.ElementAt(i).Value.SetValue(Canvas.LeftProperty, RockImages.ElementAt(i).Key.X);
-                        RockImages.ElementAt(i).Value.SetValue(Canvas.TopProperty, RockImages.ElementAt(i).Key.Y);
-                    }
-                }
-                // Remove rocks from dictionary
-                foreach (var r in toBeRemoved)
-                    RockImages.Remove(r);
             }
         }
 
@@ -263,6 +198,29 @@ namespace BallAndRock
             });
         }
 
+        private void AddBall()
+        {
+            ballHeight = screenHeight - ballSize;
+            ball = new Ball(screenWidth / 2, ballHeight, ballSize, 0, "2.png");
+            _imgBall = new Image();
+            _imgBall.Width = 65;
+            _imgBall.Height = 65;
+            _imgBall.SetValue(Canvas.LeftProperty, ball.X);
+            _imgBall.SetValue(Canvas.TopProperty, ball.Y);
+            _imgBall.Source = new BitmapImage(new Uri("ms-appx://MyAssembly/Content/Sprites/" + ball.BallFile));
+
+            uiCanvas.Children.Add(_imgBall);
+        }
+
+        private void UpdateBall()
+        {
+            if (ball.X <= minWidth) ball.X = minWidth;
+            if (ball.X > screenWidth) ball.X = screenWidth;
+
+            _imgBall.SetValue(Canvas.LeftProperty, ball.X);
+            _imgBall.SetValue(Canvas.TopProperty, ball.Y);
+        }
+
         /// <summary>
         /// Function that adds a new rock to the Canvas.
         /// The generated rock is put at a random start at the top of the canvas.
@@ -282,6 +240,57 @@ namespace BallAndRock
             uiCanvas.Children.Add(RockImages.Values.Where(i => i.Name == _totalRocks.ToString()).FirstOrDefault());
         }
 
+        private void UpdateRocks()
+        {
+            // Increases the number of rocks by one every 5 seconds until max number of rocks is reached.
+            if (_timer.ElapsedMilliseconds - _lastMiliseconds > 5000)
+            {
+                if (_nRocks < _maxRocks)
+                    _nRocks++;
+
+                _lastMiliseconds = _timer.ElapsedMilliseconds;
+            }
+
+            List<Rock> toBeRemoved = new List<Rock>();
+            for (int i = 0; i < RockImages.Count; i++)
+            {
+                Rock kRock = RockImages.ElementAt(i).Key;
+                kRock.Y += kRock.Speed;
+                kRock.ImagePos++;
+
+                if (kRock.ImagePos == 10)
+                    kRock.ImagePos = 0;
+
+                // If rock passed the screen (reached the bottom), remove ball
+                if (kRock.Y >= screenHeight)
+                {
+                    _score++;
+                    uiTbScore.Text = _score.ToString();
+                    IEnumerable<Image> images = uiCanvas.Children.OfType<Image>();
+                    foreach (Image c in images)
+                    {
+                        if (c.Name == RockImages[kRock].Name)
+                        {
+                            uiCanvas.Children.Remove(c); // Removes ball from canvas
+                            toBeRemoved.Add(kRock);
+                        }
+                    }
+                }
+                else
+                {
+                    RockImages[kRock].SetValue(Canvas.LeftProperty, kRock.X);
+                    RockImages[kRock].SetValue(Canvas.TopProperty, kRock.Y);
+                }
+
+                RockImages.ElementAt(i).Key.ImagePos = kRock.ImagePos;
+                RockImages.ElementAt(i).Key.X = kRock.X;
+                RockImages.ElementAt(i).Key.Y = kRock.Y;
+
+            }
+            // Remove rocks from dictionary
+            foreach (var r in toBeRemoved)
+                RockImages.Remove(r);
+        }
         /// <summary>
         /// Loads the dictionary with the color
         /// </summary>
