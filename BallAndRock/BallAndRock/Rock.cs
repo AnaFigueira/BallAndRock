@@ -24,9 +24,9 @@ namespace BallAndRock
         /// <summary>
         /// X Coordinate
         /// </summary>
-        private int _x;
+        private double _x;
 
-        public int X
+        public double X
         {
             get { return _x; }
             set
@@ -39,9 +39,9 @@ namespace BallAndRock
         /// <summary>
         /// Y Coordinate
         /// </summary>
-        private int _y;
+        private double _y;
 
-        public int Y
+        public double Y
         {
             get { return _y; }
             set
@@ -54,9 +54,9 @@ namespace BallAndRock
         /// <summary>
         /// Rock Size e.g., 50x50
         /// </summary>
-        private int _size;
+        private double _size;
 
-        public int Size
+        public double Size
         {
             get { return _size; }
             set
@@ -69,9 +69,9 @@ namespace BallAndRock
         /// <summary>
         /// Rock Speed
         /// </summary>
-        private int _speed;
+        private double _speed;
 
-        public int Speed
+        public double Speed
         {
             get { return _speed; }
             set
@@ -120,7 +120,7 @@ namespace BallAndRock
         /// <param name="size">Size of the rock image</param>
         /// <param name="speed">Initial speed of the rock</param>
         /// <param name="color">String to identify the rocktype file name</param>
-        public Rock(int rockNumber, int x, int y, int size, int speed, string rockType)
+        public Rock(int rockNumber, double x, double y, double size, double speed, string rockType)
         {
             this._rockNumber = rockNumber;
             this._x = x;

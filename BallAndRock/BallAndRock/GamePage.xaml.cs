@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Windows.Devices.Sensors;
+using Windows.Graphics.Display;
 using Windows.Phone.UI.Input;
+using Windows.Storage;
 using Windows.UI.Core;
 using Windows.UI.Popups;
 using Windows.UI.ViewManagement;
@@ -27,9 +29,9 @@ namespace BallAndRock
 
         private const int _maxSpeed = 15;
         private const int _minSpeed = 1;
-        private const int rockSize = 25;
+        private const int _rockSize = 25;
         private const int _maxRocks = 10;
-        private const int _rockInitPos = -50;
+        private const double _rockInitPos = -50;
         private int _nRocks = 1;
         private int _totalRocks = 0;
         private Dictionary<int, string> _rockTypes = null;
@@ -39,10 +41,8 @@ namespace BallAndRock
 
         #region Ball Properties
 
-        private const int ballSize = 60;
-        private int _ballMinSpeed = 0;
-        private int _ballMaxSpeed = 1;
-        private int ballHeight;
+        private const double ballSize = 60;
+        private double ballHeight;
         private Ball ball;
         private Image _imgBall;
 
@@ -50,9 +50,9 @@ namespace BallAndRock
 
         #region Screen properties
 
-        private int screenHeight = 0;
-        private int screenWidth = 0;
-        private int minWidth =0;
+        private double screenHeight = 0;
+        private double screenWidth = 0;
+        private double minWidth =0;
 
         #endregion Screen properties
 
@@ -62,12 +62,12 @@ namespace BallAndRock
         private Stopwatch _timer;
         private long _lastMiliseconds = 0;
         private int _score = 0;
-        private Accelerometer _accelerometer;
         private Random rand;
         private bool _gameOver = false;
         private NavigationHelper navigationHelper;
         private ObservableDictionary defaultViewModel = new ObservableDictionary();
-
+        //private Inclinometer _inclinometer;
+        private Accelerometer _accelerometer;
         #endregion Others
 
         #endregion Properties and Variables
@@ -86,6 +86,7 @@ namespace BallAndRock
             _timer = new Stopwatch();
             _timer.Start();
             _accelerometer = Accelerometer.GetDefault();
+            //_inclinometer = Inclinometer.GetDefault();
 
             if (_accelerometer != null)
             {
@@ -94,14 +95,17 @@ namespace BallAndRock
                 _accelerometer.ReportInterval = reportInterval;
                 _accelerometer.ReadingChanged += _accelerometer_ReadingChanged;
             }
-            else
-            {
-                Frame rootFrame = Window.Current.Content as Frame;
-                if (rootFrame != null && rootFrame.CanGoBack)
-                {
-                    rootFrame.GoBack();
-                }
-            }
+
+            //if (_inclinometer != null)
+            //{
+            //    // Establish the report interval for all scenarios
+            //    uint minReportInterval = _inclinometer.MinimumReportInterval;
+            //    uint reportInterval = minReportInterval > 16 ? minReportInterval : 16;
+            //    _inclinometer.ReportInterval = reportInterval;
+
+            //    // Establish the event handler
+            //    _inclinometer.ReadingChanged += _inclinometer_ReadingChanged;
+            //}
 
             timer = new DispatcherTimer();
             timer.Tick += timer_Tick;
@@ -111,6 +115,49 @@ namespace BallAndRock
             CompositionTarget.Rendering += GameLoop;
         }
 
+        private async void _accelerometer_ReadingChanged(Accelerometer sender, AccelerometerReadingChangedEventArgs args)
+        {
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                if (ball != null)
+                {
+                    AccelerometerReading reading = args.Reading;
+                    double acel = reading.AccelerationX /9.8 / 100;
+                    double initSpeed = ball.Speed;
+                    double initX = ball.X;
+                    uint t = _accelerometer.ReportInterval;
+
+                    ball.Speed = initSpeed + (acel * t);
+                    ball.X =  initX + (initSpeed * t) + ((0.5) * acel * (t * t));
+
+                    if (ball.X < minWidth)
+                    {
+                        ball.X = minWidth;
+                        ball.Speed = 0;//-ball.Speed; // Bouncing
+                    }
+                    if (ball.X > screenWidth)
+                    {
+                        ball.X = screenWidth;
+                        ball.Speed = 0;//-ball.Speed; // Bouncing
+                    }
+                }
+            });
+        }
+
+        //async void _inclinometer_ReadingChanged(Inclinometer sender, InclinometerReadingChangedEventArgs args)
+        //{
+        //    if (ball != null)
+        //    {
+        //        await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+        //        {
+        //            InclinometerReading reading = args.Reading;
+        //            ball.X += reading.RollDegrees / 2;
+                
+        //        });
+
+        //    }
+        //}
+
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             //HardwareButtons.BackPressed += HardwareButtons_BackPressed;
@@ -118,9 +165,8 @@ namespace BallAndRock
 
         private void uiCanvas_Loaded(object sender, RoutedEventArgs e)
         {
-            // Must use ActualHeight/ActualWidth
-            screenHeight = (int)this.ActualHeight;//uiCanvas.ActualHeight + 50;
-            screenWidth = (int)this.ActualWidth-65;//uiCanvas.ActualWidth - 50;
+            screenWidth = Window.Current.Bounds.Width-65;
+            screenHeight = Window.Current.Bounds.Height;
 
             // Initialize ball to be in the center of the screen at the bottom
             AddBall();
@@ -154,6 +200,11 @@ namespace BallAndRock
                 {
                     _gameOver = true;
                     CompositionTarget.Rendering -= GameLoop;
+
+                    // Update highscore if new score is higher
+                    if(Int32.Parse(ApplicationData.Current.LocalSettings.Values["HighScore"].ToString()) < _score)
+                        Windows.Storage.ApplicationData.Current.LocalSettings.Values["highScore"] = _score.ToString();
+
                     Frame.Navigate(typeof(MessageInfoPage),
                         new MessageParameters("Game Over!",
                         "Sorry! Play again?", true, true));
@@ -173,31 +224,6 @@ namespace BallAndRock
             timer.Interval = new TimeSpan(0, 0, 0, 0, rand.Next(1, 1000));
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        private async void _accelerometer_ReadingChanged(Accelerometer sender, AccelerometerReadingChangedEventArgs args)
-        {
-            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-            {
-                if (ball != null)
-                {
-                    AccelerometerReading reading = args.Reading;
-                    double acel = reading.AccelerationX;
-                    double initSpeed = ball.Speed;
-                    int initX = ball.X;
-                    uint t = _accelerometer.ReportInterval;
-
-                    ball.Speed += (double)(acel * t);
-
-                    if (ball.Speed > _ballMaxSpeed)
-                        ball.Speed = _ballMaxSpeed;
-                    ball.X += (int)(acel * 100);
-                    //ball.X = (int( initX + initSpeed + ((0.5) * acel * (t * t)));
-                }
-            });
-        }
-
         private void AddBall()
         {
             ballHeight = screenHeight - ballSize;
@@ -214,8 +240,11 @@ namespace BallAndRock
 
         private void UpdateBall()
         {
-            if (ball.X <= minWidth) ball.X = minWidth;
-            if (ball.X > screenWidth) ball.X = screenWidth;
+            if (ball.X < minWidth) 
+                ball.X = minWidth;
+            if (ball.X > screenWidth) 
+                ball.X = screenWidth;
+            
 
             _imgBall.SetValue(Canvas.LeftProperty, ball.X);
             _imgBall.SetValue(Canvas.TopProperty, ball.Y);
@@ -229,7 +258,7 @@ namespace BallAndRock
         private void AddRock()
         {
             _totalRocks++;
-            RockImages.Add(new Rock(_totalRocks, rand.Next(minWidth, screenWidth), _rockInitPos, rockSize, rand.Next(_minSpeed, _maxSpeed), _rockTypes[rand.Next(0, _rockTypes.Count-1)]), new Image() { Name = _totalRocks.ToString() });
+            RockImages.Add(new Rock(_totalRocks, (double) rand.Next((int)minWidth, (int)screenWidth), _rockInitPos, _rockSize, rand.Next((int)_minSpeed, (int)_maxSpeed), _rockTypes[rand.Next(0, _rockTypes.Count-1)]), new Image() { Name = _totalRocks.ToString() });
 
             Rock rock = RockImages.Keys.Where(i => i.RockNumber == _totalRocks).First();
 

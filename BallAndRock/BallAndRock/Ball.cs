@@ -9,9 +9,9 @@ namespace BallAndRock
         /// <summary>
         /// X Coordinate
         /// </summary>
-        private int _x;
+        private double _x;
 
-        public int X
+        public double X
         {
             get { return _x; }
             set
@@ -24,9 +24,9 @@ namespace BallAndRock
         /// <summary>
         /// Y Coordinate
         /// </summary>
-        private int _y;
+        private double _y;
 
-        public int Y
+        public double Y
         {
             get { return _y; }
             set
@@ -39,9 +39,9 @@ namespace BallAndRock
         /// <summary>
         /// Image size
         /// </summary>
-        private int _size;
+        private double _size;
 
-        public int Size
+        public double Size
         {
             get { return _size; }
             set
@@ -104,7 +104,7 @@ namespace BallAndRock
         /// <param name="size">Image Size</param>
         /// <param name="speed">Speed</param>
         /// <param name="fileName">Name of image file</param>
-        public Ball(int x, int y, int size, int speed, string fileName)
+        public Ball(double x, double y, double size, double speed, string fileName)
         {
             this._x = x;
             this._y = y;

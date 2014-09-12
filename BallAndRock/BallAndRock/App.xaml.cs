@@ -36,7 +36,11 @@ namespace BallAndRock
         {
             this.InitializeComponent();
             this.Suspending += this.OnSuspending;
-
+            
+            if (Windows.Storage.ApplicationData.Current.LocalSettings.Values["highScore"] == null)
+            {
+                Windows.Storage.ApplicationData.Current.LocalSettings.Values["highScore"] = "0";
+            }
         }
 
         /// <summary>

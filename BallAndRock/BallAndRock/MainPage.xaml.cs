@@ -26,6 +26,8 @@ namespace BallAndRock
             this.navigationHelper = new NavigationHelper(this);
             this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
             this.navigationHelper.SaveState += this.NavigationHelper_SaveState;
+            uiTbHighScore.Text = Windows.Storage.ApplicationData.Current.LocalSettings.Values["highScore"].ToString();
+            
             HideStatusBar();
 
             // Locks portrait mode for all application. Global setting.
