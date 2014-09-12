@@ -37,6 +37,8 @@ namespace BallAndRock
             this.InitializeComponent();
             this.Suspending += this.OnSuspending;
             
+            // If highscore doesn't exist, create
+            // Used to save to phone
             if (Windows.Storage.ApplicationData.Current.LocalSettings.Values["highScore"] == null)
             {
                 Windows.Storage.ApplicationData.Current.LocalSettings.Values["highScore"] = "0";

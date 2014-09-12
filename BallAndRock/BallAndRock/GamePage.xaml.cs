@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Windows.Devices.Sensors;
 using Windows.Storage;
+using Windows.UI;
 using Windows.UI.Core;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
@@ -62,9 +63,13 @@ namespace BallAndRock
         private ObservableDictionary defaultViewModel = new ObservableDictionary();
         private Accelerometer _accelerometer;
 
+        
+
         #endregion Others
 
         #endregion Properties and Variables
+
+        #region Game Methods
 
         public GamePage()
         {
@@ -165,7 +170,7 @@ namespace BallAndRock
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            //HardwareButtons.BackPressed += HardwareButtons_BackPressed;
+  
         }
 
         private void uiCanvas_Loaded(object sender, RoutedEventArgs e)
@@ -192,7 +197,16 @@ namespace BallAndRock
                 UpdateBall();
 
                 UpdateRocks();
+
+                UpdateScore();
             }
+        }
+
+        private void UpdateScore()
+        {
+            // Update highscore if new score is higher
+            if (_score > Int32.Parse(ApplicationData.Current.LocalSettings.Values["HighScore"].ToString()))
+                uiTbScore.Foreground = new SolidColorBrush(Color.FromArgb(0,0,255,0));
         }
 
         /// <summary>
@@ -206,6 +220,7 @@ namespace BallAndRock
                 if (Math.Abs(ball.X - rock.X) < (0.5 * ball.Size) + (0.5 * rock.Size) &&
                     Math.Abs(ball.Y - rock.Y) < (0.5 * ball.Size) + (0.5 * rock.Size))
                 {
+                    uiExplosionSound.Play();
                     _gameOver = true;
                     CompositionTarget.Rendering -= GameLoop;
 
@@ -300,6 +315,7 @@ namespace BallAndRock
                 if (kRock.Y >= screenHeight)
                 {
                     _score++;
+                    uiSurvivedSound.Play();
                     uiTbScore.Text = _score.ToString();
                     IEnumerable<Image> images = uiCanvas.Children.OfType<Image>();
                     foreach (Image c in images)
@@ -344,6 +360,10 @@ namespace BallAndRock
             }
         }
 
+        #endregion Game Methods
+
+        #region Status Bar
+
         /// <summary>
         /// Hides the Windows status bar
         /// </summary>
@@ -361,20 +381,10 @@ namespace BallAndRock
             ApplicationView.GetForCurrentView().SetDesiredBoundsMode(ApplicationViewBoundsMode.UseCoreWindow);
         }
 
+        #endregion Status Bar
+
         #region Navigation
 
-        ///// <summary>
-        ///// Back button override
-        ///// </summary>
-        //private void HardwareButtons_BackPressed(object sender, BackPressedEventArgs e)
-        //{
-        //    Frame rootFrame = Window.Current.Content as Frame;
-        //    if (rootFrame != null && rootFrame.CanGoBack)
-        //    {
-        //        rootFrame.GoBack();
-        //        e.Handled = true;
-        //    }
-        //}
 
         /// <summary>
         /// Gets the <see cref="NavigationHelper"/> associated with this <see cref="Page"/>.

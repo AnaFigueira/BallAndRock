@@ -91,7 +91,6 @@
     <Compile Include="Common\ObservableDictionary.cs" />
     <Compile Include="Common\RelayCommand.cs" />
     <Compile Include="Common\SuspensionManager.cs" />
-    <Compile Include="GameLogic.cs" />
     <Compile Include="GamePage.xaml.cs">
       <DependentUpon>GamePage.xaml</DependentUpon>
     </Compile>
@@ -114,13 +113,27 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Assets\Logo.scale-240.png" />
+    <Content Include="Assets\logo_106x106.png" />
+    <Content Include="Assets\logo_120x120.png" />
+    <Content Include="Assets\logo_150x150.png" />
+    <Content Include="Assets\logo_170x170.png" />
+    <Content Include="Assets\logo_210x210.png" />
+    <Content Include="Assets\logo_360x360.png" />
+    <Content Include="Assets\logo_44x44.png" />
+    <Content Include="Assets\logo_50x50.png" />
+    <Content Include="Assets\logo_62x62.png" />
+    <Content Include="Assets\logo_70x70.png" />
+    <Content Include="Assets\logo_71x71.png" />
+    <Content Include="Assets\logo_99x99.png" />
     <Content Include="Assets\SmallLogo.scale-100.png" />
     <Content Include="Assets\SmallLogo.scale-140.png" />
     <Content Include="Assets\SmallLogo.scale-240.png" />
     <Content Include="Assets\SplashScreen.scale-100.png" />
     <Content Include="Assets\SplashScreen.scale-140.png" />
     <Content Include="Assets\SplashScreen.scale-240.png" />
+    <Content Include="Assets\splashscreen_1152x1920.png" />
+    <Content Include="Assets\splashscreen_480x800.png" />
+    <Content Include="Assets\splashscreen_672x1120.png" />
     <Content Include="Assets\Square150x150Logo.scale-100.png" />
     <Content Include="Assets\Square150x150Logo.scale-140.png" />
     <Content Include="Assets\Square150x150Logo.scale-240.png" />
@@ -136,7 +149,6 @@
     <Content Include="Assets\StoreLogo.scale-100.png" />
     <Content Include="Assets\StoreLogo.scale-140.png" />
     <Content Include="Assets\StoreLogo.scale-240.png" />
-    <Content Include="Assets\WideLogo.scale-240.png" />
     <Content Include="Content\Sprites\0.png" />
     <Content Include="Content\Sprites\1.png" />
     <Content Include="Content\Sprites\2.png" />
@@ -207,6 +219,8 @@
     <Content Include="Content\Sprites\b40007.png" />
     <Content Include="Content\Sprites\b40008.png" />
     <Content Include="Content\Sprites\b40009.png" />
+    <Content Include="Sounds\explosion.wav" />
+    <Content Include="Sounds\beep1.wav" />
     <Content Include="StoreManifest.xml" />
   </ItemGroup>
   <ItemGroup>

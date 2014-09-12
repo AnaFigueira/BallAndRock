@@ -2,13 +2,10 @@
 using System;
 using Windows.Devices.Sensors;
 using Windows.Graphics.Display;
-using Windows.Phone.UI.Input;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
-
-// The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=391641
 
 namespace BallAndRock
 {
@@ -17,9 +14,9 @@ namespace BallAndRock
     /// </summary>
     public sealed partial class MainPage : Page
     {
-
         private NavigationHelper navigationHelper;
         private ObservableDictionary defaultViewModel = new ObservableDictionary();
+
         public MainPage()
         {
             this.InitializeComponent();
@@ -27,24 +24,12 @@ namespace BallAndRock
             this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
             this.navigationHelper.SaveState += this.NavigationHelper_SaveState;
             uiTbHighScore.Text = Windows.Storage.ApplicationData.Current.LocalSettings.Values["highScore"].ToString();
-            
+
             HideStatusBar();
 
             // Locks portrait mode for all application. Global setting.
             DisplayInformation.AutoRotationPreferences = DisplayOrientations.Portrait;
-
         }
-
-        private void NavigationHelper_SaveState(object sender, SaveStateEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
 
         /// <summary>
         /// Function that hides the status bar.
@@ -77,8 +62,6 @@ namespace BallAndRock
             // Windows.Phone.UI.Input.HardwareButtons.BackPressed event.
             // If you are using the NavigationHelper provided by some templates,
             // this event is handled for you.
-            //Frame.BackStack.Clear();
-
         }
 
         private void uiBtStartGame_Click(object sender, RoutedEventArgs e)
@@ -103,8 +86,54 @@ namespace BallAndRock
                 uiBtStartGame.IsEnabled = false;
                 uiTbInfo.Text = "Your phone doesn't support this game because it doesn't have an accelerometer. Sorry!";
             }
-
         }
 
+        #region Navigation
+
+        /// <summary>
+        /// Gets the <see cref="NavigationHelper"/> associated with this <see cref="Page"/>.
+        /// </summary>
+        public NavigationHelper NavigationHelper
+        {
+            get { return this.navigationHelper; }
+        }
+
+        /// <summary>
+        /// Gets the view model for this <see cref="Page"/>.
+        /// This can be changed to a strongly typed view model.
+        /// </summary>
+        public ObservableDictionary DefaultViewModel
+        {
+            get { return this.defaultViewModel; }
+        }
+
+        /// <summary>
+        /// Populates the page with content passed during navigation.  Any saved state is also
+        /// provided when recreating a page from a prior session.
+        /// </summary>
+        /// <param name="sender">
+        /// The source of the event; typically <see cref="NavigationHelper"/>
+        /// </param>
+        /// <param name="e">Event data that provides both the navigation parameter passed to
+        /// <see cref="Frame.Navigate(Type, Object)"/> when this page was initially requested and
+        /// a dictionary of state preserved by this page during an earlier
+        /// session.  The state will be null the first time a page is visited.</param>
+        private void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
+        {
+        }
+
+        /// <summary>
+        /// Preserves state associated with this page in case the application is suspended or the
+        /// page is discarded from the navigation cache.  Values must conform to the serialization
+        /// requirements of <see cref="SuspensionManager.SessionState"/>.
+        /// </summary>
+        /// <param name="sender">The source of the event; typically <see cref="NavigationHelper"/></param>
+        /// <param name="e">Event data that provides an empty dictionary to be populated with
+        /// serializable state.</param>
+        private void NavigationHelper_SaveState(object sender, SaveStateEventArgs e)
+        {
+        }
+
+        #endregion Navigation
     }
 }

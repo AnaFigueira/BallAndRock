@@ -14,7 +14,10 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        
+        <MediaElement x:Name="uiExplosionSound" AudioCategory="GameEffects" Source="Sounds/explosion.wav" AutoPlay="False" Visibility="Collapsed"/>
+        <MediaElement x:Name="uiSurvivedSound" AudioCategory="GameEffects" Source="Sounds/beep1.wav" AutoPlay="False" Visibility="Collapsed"/>
+
+
         <Canvas x:Name="uiCanvas" Grid.RowSpan="1" Loaded="uiCanvas_Loaded" Grid.Row="0">
             <Canvas.Background>
                 <ImageBrush Stretch="Fill" ImageSource="Assets/background.png"/>
