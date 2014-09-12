@@ -34,7 +34,7 @@ namespace BallAndRock
         private const double _rockInitPos = -50;
         private int _nRocks = 1;
         private int _totalRocks = 0;
-        private Dictionary<int, string> _rockTypes = null;
+        private Dictionary<string, BitmapImage> _rockTypes = null;
         private Dictionary<Rock, Image> RockImages;
 
         #endregion Rock Properties
@@ -45,6 +45,9 @@ namespace BallAndRock
         private double ballHeight;
         private Ball ball;
         private Image _imgBall;
+        private int _numberBallImages = 10;
+        private List<BitmapImage> BallImages;
+        private DispatcherTimer _rotateImagesTimer;
 
         #endregion Ball Properties
 
@@ -59,7 +62,7 @@ namespace BallAndRock
         #region Others
 
         private DispatcherTimer timer;
-        private Stopwatch _timer;
+        private DispatcherTimer _rockReleaseTimer;
         private long _lastMiliseconds = 0;
         private int _score = 0;
         private Random rand;
@@ -79,15 +82,15 @@ namespace BallAndRock
             this.navigationHelper = new NavigationHelper(this);
             this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
             this.navigationHelper.SaveState += this.NavigationHelper_SaveState;
-
+            LoadBallImages();
             HideStatusBar();
             rand = new Random((int)DateTime.Now.Ticks);
             LoadRockTypes();
-            _timer = new Stopwatch();
-            _timer.Start();
-            _accelerometer = Accelerometer.GetDefault();
-            //_inclinometer = Inclinometer.GetDefault();
+            
 
+
+            //_inclinometer = Inclinometer.GetDefault();
+            _accelerometer = Accelerometer.GetDefault();
             if (_accelerometer != null)
             {
                 uint minReportInterval = _accelerometer.MinimumReportInterval;
@@ -107,14 +110,53 @@ namespace BallAndRock
             //    _inclinometer.ReadingChanged += _inclinometer_ReadingChanged;
             //}
 
-            timer = new DispatcherTimer();
-            timer.Tick += timer_Tick;
-            timer.Interval = new TimeSpan(0, 0, 0, 0, rand.Next(1, 1500));
-            timer.Start();
+      
+            _rockReleaseTimer = new DispatcherTimer();
+            _rockReleaseTimer.Tick += _rockReleaseTimer_Tick;
+            _rockReleaseTimer.Interval = new TimeSpan(0, 0, 0, 0, rand.Next(1, 1500));
+            _rockReleaseTimer.Start();
+
+
+            _rotateImagesTimer = new DispatcherTimer();
+            _rotateImagesTimer.Tick += _rotateImagesTimer_Tick;
+            _rotateImagesTimer.Interval = new TimeSpan(0, 0, 0, 0, 200);
+            _rotateImagesTimer.Start();
+         
+
+         
 
             CompositionTarget.Rendering += GameLoop;
         }
 
+        private void _rotateImagesTimer_Tick(object sender, object e)
+        {
+            ball.ImagePos++;
+            if (ball.ImagePos == 10)
+                ball.ImagePos = 0;
+
+            _imgBall.Source = BallImages[ball.ImagePos];
+
+            for (int i = 0; i < RockImages.Count; i++)
+            {
+                RockImages.ElementAt(i).Key.ImagePos++;
+
+                if (RockImages.ElementAt(i).Key.ImagePos == 10)
+                    RockImages.ElementAt(i).Key.ImagePos = 0;
+                string r = RockImages.ElementAt(i).Key.RockType;
+                r = r.Remove(r.Length-1,1);
+                r += RockImages.ElementAt(i).Key.ImagePos;
+                RockImages.ElementAt(i).Value.Source = _rockTypes[r];
+
+            }
+        }
+
+
+        private void LoadBallImages()
+        {
+            BallImages = new List<BitmapImage>();
+            for (int i = 0; i < _numberBallImages; i++)
+                BallImages.Add(new BitmapImage(new Uri("ms-appx://MyAssembly/Content/Sprites/" + i + ".png")));
+        }
         private async void _accelerometer_ReadingChanged(Accelerometer sender, AccelerometerReadingChangedEventArgs args)
         {
             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
@@ -161,6 +203,7 @@ namespace BallAndRock
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             //HardwareButtons.BackPressed += HardwareButtons_BackPressed;
+            
         }
 
         private void uiCanvas_Loaded(object sender, RoutedEventArgs e)
@@ -215,13 +258,16 @@ namespace BallAndRock
         /// <summary>
         /// Randomly creates a new rock to be released in game
         /// </summary>
-        private void timer_Tick(object sender, object e)
+        private void _rockReleaseTimer_Tick(object sender, object e)
         {
+            if (_nRocks < _maxRocks)
+                _nRocks++;
+
             if (RockImages.Count < _nRocks)
             {
                 AddRock();
             }
-            timer.Interval = new TimeSpan(0, 0, 0, 0, rand.Next(1, 1000));
+            _rockReleaseTimer.Interval = new TimeSpan(0, 0, 0, 0, rand.Next(1, 1000));
         }
 
         private void AddBall()
@@ -233,7 +279,7 @@ namespace BallAndRock
             _imgBall.Height = 65;
             _imgBall.SetValue(Canvas.LeftProperty, ball.X);
             _imgBall.SetValue(Canvas.TopProperty, ball.Y);
-            _imgBall.Source = new BitmapImage(new Uri("ms-appx://MyAssembly/Content/Sprites/" + ball.BallFile));
+            _imgBall.Source = BallImages[0];
 
             uiCanvas.Children.Add(_imgBall);
         }
@@ -248,6 +294,8 @@ namespace BallAndRock
 
             _imgBall.SetValue(Canvas.LeftProperty, ball.X);
             _imgBall.SetValue(Canvas.TopProperty, ball.Y);
+
+  
         }
 
         /// <summary>
@@ -258,37 +306,27 @@ namespace BallAndRock
         private void AddRock()
         {
             _totalRocks++;
-            RockImages.Add(new Rock(_totalRocks, (double) rand.Next((int)minWidth, (int)screenWidth), _rockInitPos, _rockSize, rand.Next((int)_minSpeed, (int)_maxSpeed), _rockTypes[rand.Next(0, _rockTypes.Count-1)]), new Image() { Name = _totalRocks.ToString() });
+            RockImages.Add(new Rock(_totalRocks, (double) rand.Next((int)minWidth, (int)screenWidth), _rockInitPos, _rockSize, rand.Next((int)_minSpeed, (int)_maxSpeed), _rockTypes.ElementAt(rand.Next(0, _rockTypes.Count)).Key), new Image() { Name = _totalRocks.ToString() });
 
             Rock rock = RockImages.Keys.Where(i => i.RockNumber == _totalRocks).First();
 
             RockImages.Values.Where(i => i.Name == _totalRocks.ToString()).First().SetValue(Canvas.LeftProperty, rock.X);
             RockImages.Values.Where(i => i.Name == _totalRocks.ToString()).First().SetValue(Canvas.TopProperty, rock.Y);
-            RockImages.Values.Where(i => i.Name == _totalRocks.ToString()).First().Source = new BitmapImage(new Uri("ms-appx://MyAssembly/Content/Sprites/" + rock.RockType + "0.png"));
+            RockImages.Values.Where(i => i.Name == _totalRocks.ToString()).First().Source = _rockTypes.ElementAt(rand.Next(0,5)).Value;
 
             uiCanvas.Children.Add(RockImages.Values.Where(i => i.Name == _totalRocks.ToString()).FirstOrDefault());
         }
 
         private void UpdateRocks()
         {
-            // Increases the number of rocks by one every 5 seconds until max number of rocks is reached.
-            if (_timer.ElapsedMilliseconds - _lastMiliseconds > 5000)
-            {
-                if (_nRocks < _maxRocks)
-                    _nRocks++;
-
-                _lastMiliseconds = _timer.ElapsedMilliseconds;
-            }
+           
 
             List<Rock> toBeRemoved = new List<Rock>();
             for (int i = 0; i < RockImages.Count; i++)
             {
                 Rock kRock = RockImages.ElementAt(i).Key;
                 kRock.Y += kRock.Speed;
-                kRock.ImagePos++;
-
-                if (kRock.ImagePos == 10)
-                    kRock.ImagePos = 0;
+    
 
                 // If rock passed the screen (reached the bottom), remove ball
                 if (kRock.Y >= screenHeight)
@@ -325,13 +363,19 @@ namespace BallAndRock
         /// </summary>
         private void LoadRockTypes()
         {
-            _rockTypes = new Dictionary<int, string>();
-            _rockTypes.Add(0, "a1000");
-            _rockTypes.Add(1, "a3000");
-            _rockTypes.Add(2, "a4000");
-            _rockTypes.Add(3, "b1000");
-            _rockTypes.Add(4, "b3000");
-            _rockTypes.Add(5, "b4000");
+            _rockTypes = new Dictionary<string, BitmapImage>();
+
+            for (int i = 0; i < 10; i++ )
+            {
+                _rockTypes.Add("a1000" + i, new BitmapImage(new Uri("ms-appx://MyAssembly/Content/Sprites/a1000" + i + ".png")));
+                _rockTypes.Add("a3000" + i, new BitmapImage(new Uri("ms-appx://MyAssembly/Content/Sprites/a3000" + i + ".png")));
+                _rockTypes.Add("a4000" + i, new BitmapImage(new Uri("ms-appx://MyAssembly/Content/Sprites/a4000" + i + ".png")));
+                _rockTypes.Add("b1000" + i, new BitmapImage(new Uri("ms-appx://MyAssembly/Content/Sprites/b1000" + i + ".png")));
+                _rockTypes.Add("b3000" + i, new BitmapImage(new Uri("ms-appx://MyAssembly/Content/Sprites/b3000" + i + ".png")));
+                _rockTypes.Add("b4000" + i, new BitmapImage(new Uri("ms-appx://MyAssembly/Content/Sprites/b4000" + i + ".png")));
+
+
+            }
         }
 
         /// <summary>
